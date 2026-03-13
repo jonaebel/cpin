@@ -1,3 +1,4 @@
+#include "cpin.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -75,6 +76,14 @@ int main(int argc, char** argv) {
                 argv[j] = argv[j + 1];
             argc--;
             break;
+        }
+    }
+
+    // Strip --version flag and ignore other args - return 0 after printing version
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--version") == 0) {
+            printf("cpin v%i.%i \n", CPIN_VERSION_MAJOR, CPIN_VERSION_MINOR);
+            return 0;
         }
     }
 

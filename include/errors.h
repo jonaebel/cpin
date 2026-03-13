@@ -12,6 +12,8 @@ typedef enum {
     CPIN_ERR_NOTE_NOT_FOUND,    // Specified node/entry not found
     CPIN_ERR_WRITE_FAILED,      // Failed to write to file or storage
     CPIN_ERR_FILE_ACCESS,       // File access error
+    CPIN_WARN_DUPLICATE_LINE,  // same file + same line, different content → warning, still saves
+    CPIN_ERR_DUPLICATE_NOTE,   // same file + same line + same content    → error, blocks save
 } cpin_error_t;
 
 // Converts an error code to a human-readable string representation

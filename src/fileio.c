@@ -276,8 +276,7 @@ static file_block_t* add_block(notes_db_t* db, const char* filepath) {
 
 // Insert a note into a block maintaining ascending sort order by line_num.
 // Notes with the same line_num are appended after existing ones at that line.
-static cpin_error_t block_insert(file_block_t* b, const char* line_str,
-                                 int line_num, const char* content) {
+static cpin_error_t block_insert(file_block_t* b, const char* line_str,int line_num, const char* content) {
     if (b->count == b->capacity) {
         size_t new_cap = b->capacity * 2;
         note_entry_t* grown = realloc(b->notes, new_cap * sizeof(note_entry_t));
@@ -286,9 +285,15 @@ static cpin_error_t block_insert(file_block_t* b, const char* line_str,
         b->capacity = new_cap;
     }
 
-    // Find the insertion position.
+    // Find the insertion position; check for duplicates along the way.
     size_t pos = b->count;
+    int warn = 0;
     for (size_t i = 0; i < b->count; i++) {
+        if (b->notes[i].line_num == line_num) {
+            if (strcmp(b->notes[i].content, content) == 0)
+                return CPIN_ERR_DUPLICATE_NOTE;
+            warn = 1;
+        }
         if (b->notes[i].line_num > line_num) { pos = i; break; }
     }
 
@@ -299,7 +304,7 @@ static cpin_error_t block_insert(file_block_t* b, const char* line_str,
     b->notes[pos].line_str = strdup(line_str);
     b->notes[pos].content  = strdup(content);
     b->count++;
-    return CPIN_SUCCESS;
+    return warn ? CPIN_WARN_DUPLICATE_LINE : CPIN_SUCCESS;
 }
 
 // ── output helpers ────────────────────────────────────────────────────────────
@@ -348,12 +353,15 @@ cpin_error_t fileio_save(cpin_note_t* node, const char* notes_path) {
     const char* line_str = (node->line && node->line[0] != '\0') ? node->line : "";
     int line_num = line_str[0] ? atoi(line_str) : 0;
 
-    err = block_insert(block, line_str, line_num, node->content);
-    if (err != CPIN_SUCCESS) { notes_db_free(&db); return err; }
+    cpin_error_t insert_err = block_insert(block, line_str, line_num, node->content);
+    if (insert_err != CPIN_SUCCESS && insert_err != CPIN_WARN_DUPLICATE_LINE) {
+        notes_db_free(&db);
+        return insert_err;
+    }
 
-    err = db_write(notes_path, &db);
+    cpin_error_t write_err = db_write(notes_path, &db);
     notes_db_free(&db);
-    return err;
+    return (write_err != CPIN_SUCCESS) ? write_err : insert_err;
 }
 
 cpin_error_t fileio_load(char* file, char* line, const char* notes_path, char** result) {

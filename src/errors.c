@@ -11,6 +11,8 @@ const char* error_to_string(cpin_error_t error) {
         case CPIN_ERR_NOTE_NOT_FOUND:  return "note not found";
         case CPIN_ERR_WRITE_FAILED:    return "write failed";
         case CPIN_ERR_FILE_ACCESS:      return "Cannot access file";
+        case CPIN_WARN_DUPLICATE_LINE: return "a note at this line already exists";
+        case CPIN_ERR_DUPLICATE_NOTE:  return "identical note already exists at this line";
         default:                       return "unknown error";
     }
 }

@@ -125,15 +125,16 @@ int main(int argc, char** argv) {
 
         cpin_note_t note = fileio_create_note(file, line, content);
         err = fileio_save(&note, notes_path);
-        fileio_note_free(&note);
+          if (err == CPIN_WARN_DUPLICATE_LINE) {
+              printf("Warning: a note at this line already exists\n");
+              // fall through — note was still saved
+          } else if (err != CPIN_SUCCESS) {
+              printf("Error: %s\n", error_to_string(err));
+              return 1;
+          }
+          printf("Note added: %s:%s\n", file, line);
+          return 0;
 
-        if (err != CPIN_SUCCESS) {
-            printf("Error: %s\n", error_to_string(err));
-            return 1;
-        }
-
-        printf("Note added: %s:%s\n", file, line);
-        return 0;
     }
 
     // ── list ──────────────────────────────────────────────────────────────────

@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -487,4 +488,44 @@ cpin_error_t fileio_file_exist(char* file) {
 
     fclose(found_file);
     return CPIN_SUCCESS;
+}
+
+int fileio_line_is_empty(char* file, char* line) {
+    FILE* f = fopen(file, "r");
+    if (!f) return -1;
+
+    char buf[MAX_LINE];
+    int current = 1;
+    int target_line = atoi(line);
+
+    while(fgets(buf, sizeof(buf), f)) {
+        if (current == target_line) {
+            buf[strcspn(buf, "\n")] = '\0';
+            fclose(f);
+            return (buf[0] == '\0') ? 1 : 0;
+        }
+        current ++;
+    }
+
+    fclose(f);
+    return 0;
+}
+
+int fileio_line_is_out_of_bound(char* file, char* line) {
+    FILE* f = fopen(file, "r");
+    if (!f) return -1;
+
+    int count = 0;
+    int target_line = atoi(line);
+    char c;
+
+    for (c = getc(f); c != EOF; c = getc(f))
+        if (c == '\n')
+            count = count + 1;
+
+    fclose(f);
+
+    if (target_line > count) return 1;
+
+    return 0;
 }

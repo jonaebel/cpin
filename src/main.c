@@ -133,6 +133,10 @@ int main(int argc, char** argv) {
               return 1;
           }
           printf("Note added: %s:%s\n", file, line);
+
+        if (fileio_line_is_empty(file, line)) printf("Warning: note inserted in empty line\n");
+        if (fileio_line_is_out_of_bound(file, line))printf("Warning: line %s is out of range\n", line);
+
           return 0;
 
     }

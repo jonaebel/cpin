@@ -14,6 +14,8 @@ typedef enum {
     CPIN_ERR_FILE_ACCESS,       // File access error
     CPIN_WARN_DUPLICATE_LINE,  // same file + same line, different content → warning, still saves
     CPIN_ERR_DUPLICATE_NOTE,   // same file + same line + same content    → error, blocks save
+    CPIN_WARN_EMPTY_LINE,      // Line exists but is empty or contains only whitespace
+    CPIN_ERR_LINE_OUT_OF_BOUNDS, // Line number exceeds the number of lines in the file
 } cpin_error_t;
 
 // Converts an error code to a human-readable string representation

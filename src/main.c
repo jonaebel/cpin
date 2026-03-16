@@ -123,6 +123,14 @@ int main(int argc, char** argv) {
             return 1;
         }
 
+        cpin_error_t line_check = fileio_check_line(file, line);
+        if (line_check == CPIN_WARN_EMPTY_LINE) {
+            printf("Warning: This line has no content.\n");
+        } else if (line_check == CPIN_ERR_LINE_OUT_OF_BOUNDS) {
+            printf("Error: Line number exceeds the number of lines in the file.\n");
+            return 1;
+        }
+
         cpin_note_t note = fileio_create_note(file, line, content);
         err = fileio_save(&note, notes_path);
           if (err == CPIN_WARN_DUPLICATE_LINE) {
@@ -133,9 +141,6 @@ int main(int argc, char** argv) {
               return 1;
           }
           printf("Note added: %s:%s\n", file, line);
-
-        if (fileio_line_is_empty(file, line)) printf("Warning: note inserted in empty line\n");
-        if (fileio_line_is_out_of_bound(file, line))printf("Warning: line %s is out of range\n", line);
 
           return 0;
 

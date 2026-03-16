@@ -490,42 +490,40 @@ cpin_error_t fileio_file_exist(char* file) {
     return CPIN_SUCCESS;
 }
 
-int fileio_line_is_empty(char* file, char* line) {
+cpin_error_t fileio_check_line(char* file, char* line) {
     FILE* f = fopen(file, "r");
-    if (!f) return -1;
+    if (!f) return CPIN_ERR_FILE_ACCESS;
 
     char buf[MAX_LINE];
-    int current = 1;
+    int current_line = 1;
     int target_line = atoi(line);
+    long total_lines = 0;
 
     while(fgets(buf, sizeof(buf), f)) {
-        if (current == target_line) {
+        total_lines++;
+
+        if (current_line == target_line) {
             buf[strcspn(buf, "\n")] = '\0';
+
+            int is_empty = 1;
+            for (int i = 0; buf[i] != '\0'; i++) {
+                if (!isspace((unsigned char)buf[i])) {
+                    is_empty = 0;
+                    break;
+                }
+            }
+
             fclose(f);
-            return (buf[0] == '\0') ? 1 : 0;
+
+            if (is_empty) {
+                return CPIN_WARN_EMPTY_LINE;
+            } else {
+                return CPIN_SUCCESS;
+            }
         }
-        current ++;
+        current_line++;
     }
 
     fclose(f);
-    return 0;
-}
-
-int fileio_line_is_out_of_bound(char* file, char* line) {
-    FILE* f = fopen(file, "r");
-    if (!f) return -1;
-
-    int count = 0;
-    int target_line = atoi(line);
-    char c;
-
-    for (c = getc(f); c != EOF; c = getc(f))
-        if (c == '\n')
-            count = count + 1;
-
-    fclose(f);
-
-    if (target_line > count) return 1;
-
-    return 0;
+    return CPIN_ERR_LINE_OUT_OF_BOUNDS;
 }

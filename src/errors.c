@@ -13,6 +13,8 @@ const char* error_to_string(cpin_error_t error) {
         case CPIN_ERR_FILE_ACCESS:      return "Cannot access file";
         case CPIN_WARN_DUPLICATE_LINE: return "a note at this line already exists";
         case CPIN_ERR_DUPLICATE_NOTE:  return "identical note already exists at this line";
+        case CPIN_WARN_EMPTY_LINE:     return "line is empty or contains only whitespace";
+        case CPIN_ERR_LINE_OUT_OF_BOUNDS: return "line number exceeds the number of lines in the file";
         default:                       return "unknown error";
     }
 }

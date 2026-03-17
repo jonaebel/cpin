@@ -88,4 +88,13 @@ cpin_error_t fileio_search(const char* keyword, const char* notes_path, char** r
 //          or CPIN_ERR_FILE_ACCESS for other errors
 cpin_error_t fileio_file_exist(char* file);
 
+// Checks if a line in a file has content or is empty/out of bounds.
+// @file: path to the file to check
+// @line: line number to check (as string)
+// Returns: CPIN_SUCCESS if line exists and has content,
+//          CPIN_WARN_EMPTY_LINE if line exists but is empty or contains only whitespace,
+//          CPIN_ERR_LINE_OUT_OF_BOUNDS if line number exceeds file's line count,
+//          CPIN_ERR_FILE_ACCESS if file cannot be accessed
+cpin_error_t fileio_check_line(char* file, char* line);
+
 #endif

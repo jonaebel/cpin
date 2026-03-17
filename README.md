@@ -1,6 +1,12 @@
-# cpin 
-A sticky note tool for your code which Attaches notes to specific 
-lines and saves your notes localy without touching your source files.
+# cpin
+A sticky note tool for your code. Attach notes to specific lines and save them locally without touching your source files.
+
+## Editor integrations
+
+| Editor | Repository |
+|--------|-----------|
+| VS Code | [jonaebel/cpin-vscode](https://github.com/jonaebel/cpin-vscode) |
+| Neovim | [jonaebel/cpin.nvim](https://github.com/jonaebel/cpin.nvim) |
 
 ## Usage
 ```bash

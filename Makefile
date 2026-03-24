@@ -1,23 +1,31 @@
 CC = clang
-CFLAGS = -Wall -Wextra -g -pedantic -std=c99 -D_POSIX_C_SOURCE=200809L -Iinclude
+CFLAGS = -Wall -Wextra -g -pedantic -std=c99 -D_POSIX_C_SOURCE=200809L $(INCLUDES)
+INCLUDES = -Iinclude
+SRC = src/*.c
+TARGET_DIR = bin
+TARGET = $(TARGET_DIR)/cpin
 
-all:
-	$(CC) $(CFLAGS) src/*.c -o cpin
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	mkdir -p $(TARGET_DIR)
+	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
 
 clean:
-	rm -f cpin cpin_asan
+	rm -f $(TARGET_DIR)/*
 
-run:
-	./cpin
+run: $(TARGET)
+	$(TARGET)
 
 asan:
-	$(CC) $(CFLAGS) -fsanitize=address,undefined -fno-omit-frame-pointer src/*.c -o cpin_asan
+	$(CC) $(CFLAGS) -fsanitize=address,undefined -fno-omit-frame-pointer $(SRC) -o $(TARGET_DIR)/cpin_asan
 
-valgrind:
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./cpin
+valgrind: $(TARGET)
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes $(TARGET)
 
-install: all
-	cp cpin /usr/local/bin/cpin
+install: $(TARGET)
+	cp $(TARGET) /usr/local/bin/cpin
 
 uninstall:
 	rm -f /usr/local/bin/cpin

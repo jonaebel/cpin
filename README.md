@@ -10,7 +10,7 @@ A sticky note tool for your code. Attach notes to specific lines and save them l
 
 ## Usage
 ```bash
-# Add a note to line 42 in parser.c
+# Add a note to line 42 in parser.c 
 cpin add src/parser.c:42 "why does this loop start at 1?"
 
 # Add a note to your global store (~/.cpin/notes)

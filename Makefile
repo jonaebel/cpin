@@ -24,10 +24,13 @@ asan:
 valgrind: $(TARGET)
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes $(TARGET)
 
+test: $(TARGET)
+	@bash tests/run_tests.sh $(TARGET)
+
 install: $(TARGET)
 	cp $(TARGET) /usr/local/bin/cpin
 
 uninstall:
 	rm -f /usr/local/bin/cpin
 
-.PHONY: all asan valgrind clean run install uninstall
+.PHONY: all asan valgrind clean run install uninstall test

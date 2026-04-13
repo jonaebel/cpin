@@ -14,7 +14,5 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    commands_parse_args(argc, argv, flags);
-
-    return 0;
+    return commands_parse_args(argc, argv, flags);
 }

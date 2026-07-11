@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "cpin.h"
+#include "commands.h"
 
 
 static inline void flags_remove_arg(int* i, int* argc, char** argv) {
@@ -39,6 +40,11 @@ int flags_strip(int* argc, char** argv) {
         // Strip --version flag and ignore other args - exit with status 0 after printing version
         } else if (strcmp(argv[i], "--version") == 0) {
             printf("cpin v%i.%i \n", CPIN_VERSION_MAJOR, CPIN_VERSION_MINOR);
+            exit(0);
+
+        // Strip --help / -h flag - exit with status 0 after printing usage
+        } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+            commands_usage();
             exit(0);
         }
     }

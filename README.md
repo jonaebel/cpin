@@ -10,6 +10,13 @@ A sticky note tool for your code. Attach notes to specific lines and save them l
 
 ## Usage
 ```bash
+# Show help context on how to use cpin 
+cpin -h 
+
+or 
+
+cpin --help
+
 # Add a note to line 42 in parser.c 
 cpin add src/parser.c:42 "why does this loop start at 1?"
 

@@ -18,9 +18,18 @@ typedef enum {
     CPIN_ERR_LINE_OUT_OF_BOUNDS, // Line number exceeds the number of lines in the file
 } cpin_error_t;
 
+typedef enum {
+    CPIN_SEVERITY_WARNING,
+    CPIN_SEVERITY_ERROR,
+} cpin_severity_t;
+
 // Converts an error code to a human-readable string representation
 // @error: the error code to convert
 // Returns: pointer to static string describing the error
 const char* error_to_string(cpin_error_t error);
+
+// Prints error/warning to stderr with the appropriate prefix.
+// Warnings return control to the caller; errors call exit(1).
+void cpin_report(cpin_severity_t severity, cpin_error_t error);
 
 #endif

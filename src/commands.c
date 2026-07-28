@@ -37,7 +37,7 @@ static const char* resolve_notes_path(int flags) {
     static char path[4096];
     const char* home = getenv("HOME");
     if (!home) {
-        fprintf(stderr, "Error: $HOME is not set\n");
+        fprintf(stderr, "error: $HOME is not set\n");
         exit(1);
     }
     snprintf(path, sizeof(path), "%s/.cpin/notes", home);
@@ -59,39 +59,39 @@ int commands_parse_args(int argc, char** argv, int flags) {
         char* line = NULL;
         cpin_error_t err = parser_split_target(argv[2], &file, &line);
         if (err != CPIN_SUCCESS) {
-            printf("Error: %s\n", error_to_string(err));
+            cpin_report(CPIN_SEVERITY_ERROR, err);
             return 1;
         }
 
         char* content = parser_get_note(argv[3]);
         if (!content || content[0] == '\0') {
-            printf("Error: note content cannot be empty\n");
+            fprintf(stderr, "error: note content cannot be empty\n");
             return 1;
         }
 
         err = fileio_file_exist(file);
         if (err != CPIN_SUCCESS) {
-            printf("Error: %s\n", error_to_string(err));
+            cpin_report(CPIN_SEVERITY_ERROR, err);
             return 1;
         }
 
         cpin_error_t line_check = fileio_check_line(file, line);
         if (line_check == CPIN_WARN_EMPTY_LINE) {
-            printf("Warning: This line has no content.\n");
+            cpin_report(CPIN_SEVERITY_WARNING, CPIN_WARN_EMPTY_LINE);
         } else if (line_check == CPIN_ERR_LINE_OUT_OF_BOUNDS) {
-            printf("Error: Line number exceeds the number of lines in the file.\n");
+            cpin_report(CPIN_SEVERITY_ERROR, CPIN_ERR_LINE_OUT_OF_BOUNDS);
             return 1;
         }
 
         cpin_note_t note = fileio_create_note(file, line, content);
         err = fileio_save(&note, notes_path);
-          if (err == CPIN_WARN_DUPLICATE_LINE) {
-              printf("Warning: a note at this line already exists\n");
-              // fall through — note was still saved
-          } else if (err != CPIN_SUCCESS) {
-              printf("Error: %s\n", error_to_string(err));
-              return 1;
-          }
+        if (err == CPIN_WARN_DUPLICATE_LINE) {
+            cpin_report(CPIN_SEVERITY_WARNING, CPIN_WARN_DUPLICATE_LINE);
+            // fall through — note was still saved
+        } else if (err != CPIN_SUCCESS) {
+            cpin_report(CPIN_SEVERITY_ERROR, err);
+            return 1;
+        }
           printf("Note added: %s:%s\n", file, line);
 
           return 0;
@@ -119,7 +119,7 @@ int commands_parse_args(int argc, char** argv, int flags) {
         }
 
         if (err != CPIN_SUCCESS) {
-            printf("Error: %s\n", error_to_string(err));
+            cpin_report(CPIN_SEVERITY_ERROR, err);
             return 1;
         }
 
@@ -138,13 +138,13 @@ int commands_parse_args(int argc, char** argv, int flags) {
         char* line = NULL;
         cpin_error_t err = parser_split_target(argv[2], &file, &line);
         if (err != CPIN_SUCCESS) {
-            printf("Error: %s\n", error_to_string(err));
+            cpin_report(CPIN_SEVERITY_ERROR, err);
             return 1;
         }
 
         err = fileio_delete(file, line, notes_path);
         if (err != CPIN_SUCCESS) {
-            printf("Error: %s\n", error_to_string(err));
+            cpin_report(CPIN_SEVERITY_ERROR, err);
             return 1;
         }
 
@@ -165,7 +165,7 @@ int commands_parse_args(int argc, char** argv, int flags) {
             return 0;
         }
         if (err != CPIN_SUCCESS) {
-            printf("Error: %s\n", error_to_string(err));
+            cpin_report(CPIN_SEVERITY_ERROR, err);
             return 1;
         }
 
@@ -183,12 +183,12 @@ int commands_parse_args(int argc, char** argv, int flags) {
             return 0;
         }
         if (err != CPIN_SUCCESS) {
-            printf("Error: %s\n", error_to_string(err));
+            cpin_report(CPIN_SEVERITY_ERROR, err);
             return 1;
         }
 
         if (flags & FLAG_JSON && flags & FLAG_MD) {
-            printf("Error: --json and --md are mutually exclusive\n");
+            fprintf(stderr, "error: --json and --md are mutually exclusive\n");
             free(result);
             return 1;
         }

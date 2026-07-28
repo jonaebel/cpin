@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "errors.h"
 
 const char* error_to_string(cpin_error_t error) {
@@ -16,5 +18,13 @@ const char* error_to_string(cpin_error_t error) {
         case CPIN_WARN_EMPTY_LINE:     return "line is empty or contains only whitespace";
         case CPIN_ERR_LINE_OUT_OF_BOUNDS: return "line number exceeds the number of lines in the file";
         default:                       return "unknown error";
+    }
+}
+
+void cpin_report(cpin_severity_t severity, cpin_error_t error) {
+    const char* prefix = (severity == CPIN_SEVERITY_WARNING) ? "warning" : "error";
+    fprintf(stderr, "%s: %s\n", prefix, error_to_string(error));
+    if (severity == CPIN_SEVERITY_ERROR) {
+        exit(1);
     }
 }

@@ -6,6 +6,7 @@
 #include "parser.h"
 #include "errors.h"
 #include "fileio.h"
+#include "projects.h"
 
 
 void commands_usage(void) {
@@ -15,6 +16,9 @@ void commands_usage(void) {
     printf("  cpin remove <file:line> [--global]\n");
     printf("  cpin search <keyword> [--global]\n");
     printf("  cpin export [--json|--md] [--global]\n");
+    printf("  cpin project-root set <path>\n");
+    printf("  cpin project-root unset <path>\n");
+    printf("  cpin project-root list\n");
 }
 
 static void print_json_string(const char* s) {
@@ -31,17 +35,27 @@ static void print_json_string(const char* s) {
 }
 
 static const char* resolve_notes_path(int flags) {
-    if (!(flags & FLAG_GLOBAL)) return ".cpin/notes";
-
-    // generates path to global .cpin dir
-    static char path[4096];
-    const char* home = getenv("HOME");
-    if (!home) {
-        fprintf(stderr, "error: $HOME is not set\n");
-        exit(1);
+    if (flags & FLAG_GLOBAL) {
+        static char global_path[4096];
+        const char* home = getenv("HOME");
+        if (!home) {
+            fprintf(stderr, "error: $HOME is not set\n");
+            exit(1);
+        }
+        snprintf(global_path, sizeof(global_path), "%s/.cpin/notes", home);
+        return global_path;
     }
-    snprintf(path, sizeof(path), "%s/.cpin/notes", home);
-    return path;
+
+    /* check for a registered project root that contains cwd */
+    char* root = projects_find_root();
+    if (root) {
+        static char project_path[4096];
+        snprintf(project_path, sizeof(project_path), "%s/.cpin/notes", root);
+        free(root);
+        return project_path;
+    }
+
+    return ".cpin/notes";
 }
 
 int commands_parse_args(int argc, char** argv, int flags) {
@@ -267,6 +281,45 @@ int commands_parse_args(int argc, char** argv, int flags) {
 
         free(result);
         return 0;
+    // ── project-root ──────────────────────────────────────────────────────────
+    } else if (!strcmp(cmd, "project-root")) {
+        if (argc < 3) {
+            printf("Usage:\n");
+            printf("  cpin project-root set <path>\n");
+            printf("  cpin project-root unset <path>\n");
+            printf("  cpin project-root list\n");
+            return 1;
+        }
+
+        char* subcmd = argv[2];
+
+        if (!strcmp(subcmd, "set")) {
+            if (argc < 4) {
+                printf("Usage: cpin project-root set <path>\n");
+                return 1;
+            }
+            return projects_add_root(argv[3]);
+
+        } else if (!strcmp(subcmd, "unset")) {
+            if (argc < 4) {
+                printf("Usage: cpin project-root unset <path>\n");
+                return 1;
+            }
+            return projects_remove_root(argv[3]);
+
+        } else if (!strcmp(subcmd, "list")) {
+            projects_list_roots();
+            return 0;
+
+        } else {
+            fprintf(stderr, "error: unknown subcommand '%s'\n", subcmd);
+            printf("Usage:\n");
+            printf("  cpin project-root set <path>\n");
+            printf("  cpin project-root unset <path>\n");
+            printf("  cpin project-root list\n");
+            return 1;
+        }
+
     } else {
         printf("Unknown command: %s\n", cmd);
         commands_usage();
